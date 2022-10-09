@@ -3,51 +3,77 @@ import {useState} from 'react';
 
 function App() {
 
-    let [docTitle, setDocTitle] = useState(['코트 추천', '맛집 추천', '여행지 추천']);
-    let [logo, setLogo] = useState('ReactBlog');
-    let [like, setLike] = useState([]);
-    let [modal, setModal] = useState(false);
+    const [docTitle, setDocTitle] = useState([]);
+    const [logo, setLogo] = useState('ReactBlog');
+    const [like, setLike] = useState([]);
+    const [displayModal, setDisplayModal] = useState(false);
+    const [displayTitle, setDisplayTitle] = useState('');
+    const [newTodo, setNewTodo] = useState('');
 
-    [1,2,3].map(function(a){
-        return 'test';
-    })
+    function likeChange(i){
+        let copy = [...like];
+        copy[i] = copy[i] + 1;
+        setLike(copy);
+    }
 
+    function addList(newTodo){
+        let newDoc = [...docTitle];
+        newDoc.push(newTodo);
+        like.push(0);
+        setDocTitle(newDoc);
+        setNewTodo("")
+    }
 
+    function deleteDoc(i){
+        let deleteDoc =[...docTitle];
+        deleteDoc.splice(i, 1);
+        setDocTitle(deleteDoc);
+    }
 
   return (
     <div className="App">
         <div className="black-nav">
             <h4 style={{color:'white', fontSize : '30px'}}>{logo}</h4>
         </div>
-        <button onClick={()=>{
-            let copy = [...docTitle];
-            copy = [ '나나 나나나', '가가 가가가', '다다 다다다'];
-            copy = copy.sort();
-            setDocTitle(copy)}}>글 수정</button>
 
         {
             docTitle.map(function(docTitle, i){
-                like.push(0);
                 return (
-                <div className="list"  key={i} >
-                    <h4 onClick={()=>{setModal(!modal)}}> {i+1} . {docTitle} </h4>
-                    <span onClick={()=>{
-                        let copy = [...like];
-                        copy[i] = copy[i]+1;
-                        setLike(copy);}
-                    }>👍</span>{like[i]}
+                <div className="list" key={i}>
+                    <h4 onClick={()=>{
+                        setDisplayModal(!displayModal);
+                        setDisplayTitle(docTitle);
+                    }
+                    }> {i + 1} . {docTitle}
+                        <span onClick={(e) => {
+                            e.stopPropagation();
+                            likeChange(i);
+                        }
+                        }>👍</span>{like[i]}
+                    </h4>
+
                     <p>2022-09-21 발행</p>
+                    <button onClick={()=>deleteDoc(i)}>삭제</button>
+
                 </div>
                 )
             })
         }
 
-        {modal===true
-            ? <Modal docTitle={docTitle} color={'skyblue'}/> : null
+        <input
+            value={newTodo}
+            onKeyDown={(e)=>{if(e.key ==='Enter'){addList(newTodo);} } }
+            onChange={(e)=>{setNewTodo(e.target.value);}}
+        />
+        <button onClick={(e)=>{addList(newTodo);}
+
+        }>뀨잉</button>
+
+        {displayModal
+            ? <Modal displayTitle={displayTitle}
+                     color={'skyblue'}
+            /> : null
         }
-
-
-
     </div>
   );
 }
@@ -55,9 +81,10 @@ function App() {
 function Modal(props){
     return (
         <div className="modal" style={{background : props.color}}>
-            <h4>{props.docTitle}</h4>
+            <h4>{props.displayTitle}</h4>
             <p>날짜</p>
             <p>상세내용</p>
+            <button onClick={props.onClick}>글 수정</button>
         </div>
     )
 }
